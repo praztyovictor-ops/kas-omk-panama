@@ -322,8 +322,8 @@
               <label class="field"><span>Pembina / Pastor Paroki (opsional)</span><input id="sPembina"></label>
             </div>
             <div class="form-2">
-              <label class="field"><span>Saldo Awal Kas (Rp)</span><input id="sSaldoAwal" type="number" min="0" step="500"></label>
-              <label class="field"><span>Target Kas (Rp)</span><input id="sTargetKas" type="number" min="0" step="10000"></label>
+              <label class="field"><span>Saldo Awal Kas (Rp)</span><input id="sSaldoAwal" type="text" inputmode="numeric" pattern="[0-9., ]*" placeholder="Contoh: 5.807.500"><small class="note">Boleh pakai titik pemisah ribuan.</small></label>
+              <label class="field"><span>Target Kas (Rp)</span><input id="sTargetKas" type="text" inputmode="numeric" pattern="[0-9., ]*" placeholder="Contoh: 10.000.000"><small class="note">Boleh pakai titik pemisah ribuan.</small></label>
             </div>
             <button class="btn btn-primary w-full" type="submit">💾 Simpan Pengaturan</button>
           </form>
@@ -436,7 +436,7 @@
     <form id="budgetForm" class="form">
       <input type="hidden" id="bId">
       <label class="field"><span>Kategori Pengeluaran *</span><select id="bKategori" required></select></label>
-      <label class="field"><span>Batas Anggaran (Rp / bulan) *</span><input type="number" id="bJumlah" min="0" step="5000" required placeholder="Contoh: 500000"></label>
+      <label class="field"><span>Batas Anggaran (Rp / bulan) *</span><input type="text" id="bJumlah" inputmode="numeric" pattern="[0-9., ]*" required placeholder="Contoh: 500.000"><small class="note">Boleh pakai titik pemisah ribuan.</small></label>
       <div class="modal-actions"><button type="button" class="btn btn-outline" data-close="budgetModal">Batal</button><button type="submit" class="btn btn-primary">💾 Simpan Anggaran</button></div>
     </form>
   </div>

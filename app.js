@@ -347,7 +347,7 @@ function fillSettings(){
   const s=state.settings;
   $('#sNamaOmk').value=s.namaOmk||''; $('#sParoki').value=s.paroki||''; $('#sTempat').value=s.tempat||'';
   $('#sKetua').value=s.ketua||''; $('#sBendahara').value=s.bendahara||''; $('#sSekretaris').value=s.sekretaris||''; $('#sPembina').value=s.pembina||'';
-  $('#sSaldoAwal').value=s.saldoAwal||0; $('#sTargetKas').value=s.targetKas||0;
+  $('#sSaldoAwal').value=fmtNum(s.saldoAwal||0); $('#sTargetKas').value=fmtNum(s.targetKas||0);
 }
 
 /* ===== Modals: transaction ===== */
@@ -368,7 +368,7 @@ function openTrxModal(id=''){
   $('#trxForm').reset(); $('#tId').value=t?.id||'';
   $('#trxModalTitle').textContent=t?'✏️ Edit Transaksi':'＋ Tambah Transaksi';
   setJenis(t?.jenis||'masuk'); fillMemberOptions(t?.memberId||'');
-  if(t){ $('#tTanggal').value=t.tanggal; $('#tJumlah').value=t.jumlah; $('#tKeterangan').value=t.keterangan; fillTrxCategoryOptions(t.jenis,t.kategori); $('#tMetode').value=t.metode||'Tunai'; $('#tPic').value=t.pic||''; $('#tCatatan').value=t.catatan||''; }
+  if(t){ $('#tTanggal').value=t.tanggal; $('#tJumlah').value=fmtNum(t.jumlah); $('#tKeterangan').value=t.keterangan; fillTrxCategoryOptions(t.jenis,t.kategori); $('#tMetode').value=t.metode||'Tunai'; $('#tPic').value=t.pic||''; $('#tCatatan').value=t.catatan||''; }
   else { $('#tTanggal').value= monthKeyOf(todayISO())===ui.month ? todayISO() : ui.month+'-01'; }
   updateAmountPreview(); openModal('trxModal');
 }
@@ -383,7 +383,7 @@ function openBudgetModal(id=''){
   const b=state.budgets.find(x=>x.id===id); $('#budgetForm').reset(); $('#bId').value=b?.id||'';
   $('#budgetModalSub').textContent='Bulan: '+monthLabel(ui.month);
   $('#bKategori').innerHTML=state.categories.filter(c=>c.type==='keluar').map(c=>`<option value="${esc(c.name)}" ${b?.category===c.name?'selected':''}>${esc(c.icon||'🏷️')} ${esc(c.name)}</option>`).join('');
-  if(b) $('#bJumlah').value=b.amount;
+  if(b) $('#bJumlah').value=fmtNum(b.amount);
   openModal('budgetModal');
 }
 
@@ -563,6 +563,7 @@ function init(){
   // Transaction form
   $$('.seg').forEach(b=>b.onclick=()=>setJenis(b.dataset.jenis));
   $('#tJumlah').addEventListener('input',updateAmountPreview);
+  ['tJumlah','sSaldoAwal','sTargetKas','bJumlah'].forEach(id=>{ const field=$('#'+id); field.addEventListener('blur',()=>{ if(field.value.trim()) field.value=fmtNum(parseRpInput(field.value)); }); });
   $$('.chip-btn').forEach(b=>b.onclick=()=>{ $('#tJumlah').value=b.dataset.amt; updateAmountPreview(); });
   $('#trxForm').addEventListener('submit',e=>{
     e.preventDefault();
@@ -593,7 +594,7 @@ function init(){
   $('#btnAddCategory').onclick=()=>{ $('#categoryForm').reset(); openModal('categoryModal'); };
   $('#categoryForm').addEventListener('submit',e=>{ e.preventDefault(); const nama=$('#cNama').value.trim(), jenis=$('#cJenis').value, ikon=$('#cIkon').value.trim()||'🏷️'; if(!nama) return; if(state.categories.some(c=>c.name.toLowerCase()===nama.toLowerCase()&&c.type===jenis)){ toast('⚠️ Kategori itu sudah ada.'); return; } state.categories.push({id:uid(),name:nama,type:jenis,icon:ikon}); toast('✅ Kategori ditambahkan'); closeModal('categoryModal'); renderAll(); });
   $('#btnAddBudget').onclick=()=>openBudgetModal();
-  $('#budgetForm').addEventListener('submit',e=>{ e.preventDefault(); const id=$('#bId').value, kategori=$('#bKategori').value, jumlah=Number($('#bJumlah').value); const dup=state.budgets.find(b=>b.month===ui.month&&b.category===kategori&&b.id!==id); if(dup){ toast('⚠️ Anggaran kategori ini sudah ada untuk bulan terpilih. Edit yang sudah ada.'); return; } if(id){ const b=state.budgets.find(x=>x.id===id); b.category=kategori; b.amount=jumlah; b.month=ui.month; toast('✅ Anggaran diperbarui'); } else { state.budgets.push({id:uid(),month:ui.month,category:kategori,amount:jumlah}); toast('✅ Anggaran ditambahkan untuk '+monthLabel(ui.month)); } closeModal('budgetModal'); renderAll(); });
+  $('#budgetForm').addEventListener('submit',e=>{ e.preventDefault(); const id=$('#bId').value, kategori=$('#bKategori').value, jumlah=parseRpInput($('#bJumlah').value); const dup=state.budgets.find(b=>b.month===ui.month&&b.category===kategori&&b.id!==id); if(dup){ toast('⚠️ Anggaran kategori ini sudah ada untuk bulan terpilih. Edit yang sudah ada.'); return; } if(id){ const b=state.budgets.find(x=>x.id===id); b.category=kategori; b.amount=jumlah; b.month=ui.month; toast('✅ Anggaran diperbarui'); } else { state.budgets.push({id:uid(),month:ui.month,category:kategori,amount:jumlah}); toast('✅ Anggaran ditambahkan untuk '+monthLabel(ui.month)); } closeModal('budgetModal'); renderAll(); });
   // Cloud sign-in and synchronization
   $('#btnCloudLogin').onclick=()=>cloudLogin($('#cloudEmail').value.trim(),$('#cloudPassword').value,false);
   $('#btnCloudSignup').onclick=()=>cloudLogin($('#cloudEmail').value.trim(),$('#cloudPassword').value,true);
@@ -602,7 +603,7 @@ function init(){
   resumeCloud();
   // Settings & data
   fillSettings();
-  $('#settingsForm').addEventListener('submit',e=>{ e.preventDefault(); state.settings={...state.settings, namaOmk:$('#sNamaOmk').value.trim(), paroki:$('#sParoki').value.trim(), tempat:$('#sTempat').value.trim(), ketua:$('#sKetua').value.trim(), bendahara:$('#sBendahara').value.trim(), sekretaris:$('#sSekretaris').value.trim(), pembina:$('#sPembina').value.trim(), saldoAwal:Number($('#sSaldoAwal').value)||0, targetKas:Number($('#sTargetKas').value)||0}; toast('✅ Pengaturan disimpan'); renderAll(); });
+  $('#settingsForm').addEventListener('submit',e=>{ e.preventDefault(); state.settings={...state.settings, namaOmk:$('#sNamaOmk').value.trim(), paroki:$('#sParoki').value.trim(), tempat:$('#sTempat').value.trim(), ketua:$('#sKetua').value.trim(), bendahara:$('#sBendahara').value.trim(), sekretaris:$('#sSekretaris').value.trim(), pembina:$('#sPembina').value.trim(), saldoAwal:parseRpInput($('#sSaldoAwal').value), targetKas:parseRpInput($('#sTargetKas').value)}; toast('✅ Pengaturan disimpan'); renderAll(); });
   $('#btnBackup').onclick=()=>{ download(`Backup-Kas-OMK-${todayISO()}.json`, JSON.stringify(state,null,2), 'application/json'); toast('💾 Backup JSON di-download. Simpan di tempat aman!'); };
   $('#fileRestore').addEventListener('change',e=>{ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const parsed=JSON.parse(reader.result); if(!parsed.transactions||!parsed.settings) throw new Error('format'); state=parsed; ui.page=1; fillSettings(); toast('✅ Restore berhasil! Data backup dimuat.'); renderAll(); }catch(err){ toast('⚠️ File backup tidak valid.'); } }; reader.readAsText(file); e.target.value=''; });
   $('#btnDemo').onclick=()=>confirmAction('Muat ulang data contoh?','Semua data saat ini akan diganti dengan data contoh.',()=>{ state=seedState(); fillSettings(); toast('✨ Data contoh dimuat'); renderAll(); });
