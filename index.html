@@ -376,7 +376,7 @@
       <input type="hidden" id="tJenis" value="masuk">
       <div class="form-2">
         <label class="field"><span>Tanggal *</span><input type="date" id="tTanggal" required></label>
-        <label class="field"><span>Jumlah (Rp) *</span><input type="number" id="tJumlah" min="1" step="500" placeholder="Contoh: 50000" required><small id="tJumlahPreview" class="amount-preview"></small></label>
+        <label class="field"><span>Jumlah (Rp) *</span><input type="text" id="tJumlah" inputmode="numeric" pattern="[0-9., ]*" placeholder="Contoh: 5.807.500" required><small id="tJumlahPreview" class="amount-preview"></small><small class="note">Boleh pakai titik pemisah ribuan, misalnya 5.807.500.</small></label>
       </div>
       <label class="field"><span>Keterangan *</span><input id="tKeterangan" placeholder="Contoh: Iuran bulanan anggota / Konsumsi rapat pleno" required></label>
       <div class="form-2">

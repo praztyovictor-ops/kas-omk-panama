@@ -20,6 +20,7 @@ const currentMonthKey = () => { const d=new Date(); return `${d.getFullYear()}-$
 const monthLabel = (key) => { if(!key) return '-'; const [y,m]=key.split('-').map(Number); return `${MONTHS[m-1]} ${y}`; };
 const fmtRp = (n) => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n)||0);
 const fmtNum = (n) => new Intl.NumberFormat('id-ID').format(Number(n)||0);
+const parseRpInput = (value) => { const digits=String(value??'').replace(/[^0-9]/g,''); return digits ? Number(digits) : 0; };
 const fmtDate = (s) => { if(!s) return '-'; const d=new Date(s+'T00:00:00'); return d.toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); };
 const fmtDateShort = (s) => { if(!s) return '-'; const d=new Date(s+'T00:00:00'); return d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); };
 const esc = (s='') => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -371,7 +372,7 @@ function openTrxModal(id=''){
   else { $('#tTanggal').value= monthKeyOf(todayISO())===ui.month ? todayISO() : ui.month+'-01'; }
   updateAmountPreview(); openModal('trxModal');
 }
-function updateAmountPreview(){ const v=Number($('#tJumlah').value)||0; $('#tJumlahPreview').textContent=v? fmtRp(v):''; }
+function updateAmountPreview(){ const v=parseRpInput($('#tJumlah').value); $('#tJumlahPreview').textContent=v? fmtRp(v):''; }
 function openMemberModal(id=''){
   const m=memberById(id); $('#memberForm').reset(); $('#mId').value=m?.id||'';
   $('#memberModalTitle').textContent=m?'✏️ Edit Anggota':'＋ Tambah Anggota';
@@ -566,7 +567,7 @@ function init(){
   $('#trxForm').addEventListener('submit',e=>{
     e.preventDefault();
     const id=$('#tId').value, jenis=$('#tJenis').value;
-    const data={ id:id||uid(), tanggal:$('#tTanggal').value, jenis, jumlah:Number($('#tJumlah').value), keterangan:$('#tKeterangan').value.trim(), kategori:$('#tKategori').value, metode:$('#tMetode').value, memberId:$('#tAnggota').value, pic:$('#tPic').value.trim(), catatan:$('#tCatatan').value.trim(), createdAt:Date.now() };
+    const data={ id:id||uid(), tanggal:$('#tTanggal').value, jenis, jumlah:parseRpInput($('#tJumlah').value), keterangan:$('#tKeterangan').value.trim(), kategori:$('#tKategori').value, metode:$('#tMetode').value, memberId:$('#tAnggota').value, pic:$('#tPic').value.trim(), catatan:$('#tCatatan').value.trim(), createdAt:Date.now() };
     if(!data.tanggal||!data.keterangan||!(data.jumlah>0)){ toast('⚠️ Tanggal, keterangan & jumlah wajib diisi dengan benar.'); return; }
     if(id){ const idx=state.transactions.findIndex(t=>t.id===id); data.createdAt=state.transactions[idx]?.createdAt||Date.now(); state.transactions[idx]=data; toast('✅ Transaksi diperbarui'); }
     else { state.transactions.push(data); toast(jenis==='masuk'?'✅ Pemasukan tercatat: '+fmtRp(data.jumlah):'✅ Pengeluaran tercatat: '+fmtRp(data.jumlah)); }
